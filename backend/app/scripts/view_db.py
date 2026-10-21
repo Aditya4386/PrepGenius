@@ -1,8 +1,9 @@
-"""
-Utility script to view all records in the PrepGenius MySQL database.
-Run with:
-    .\.venv\Scripts\python.exe app/scripts/view_db.py
-"""
+import sys
+import os
+
+# Add backend directory to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -31,8 +32,8 @@ def view_all():
     print("-" * 80)
     for s in students:
         s_id = s.id or ""
-        name = s.full_name or "—"
-        email = s.email or "—"
+        name = s.full_name or "-"
+        email = s.email or "-"
         print(f"{s_id:<24} | {name:<20} | {email:<30}")
 
     # 2. Profiles Table
@@ -45,24 +46,24 @@ def view_all():
         student_label = f"{student.full_name} ({student.email})" if student and student.full_name else p.student_id
 
         print(f"\n--- [{idx}] Student: {student_label} ---")
-        print(f"  • Student ID         : {p.student_id}")
-        print(f"  • Target Role        : {p.target_role or 'Not Selected'}")
-        print(f"  • Company Category   : {p.company_type or 'Not Selected'}")
-        print(f"  • Weekly Study Hours : {p.weekly_study_hours} hrs/week")
-        print(f"  • Target Deadline    : {p.preparation_deadline or 'Unspecified (12 weeks default)'}")
-        print(f"  • Target Companies   : {', '.join(p.target_companies) if p.target_companies else 'None'}")
-        print(f"  • Career Goal        : {p.career_goal or 'None'}")
+        print(f"  * Student ID         : {p.student_id}")
+        print(f"  * Target Role        : {p.target_role or 'Not Selected'}")
+        print(f"  * Company Category   : {p.company_type or 'Not Selected'}")
+        print(f"  * Weekly Study Hours : {p.weekly_study_hours} hrs/week")
+        print(f"  * Target Deadline    : {p.preparation_deadline or 'Unspecified (12 weeks default)'}")
+        print(f"  * Target Companies   : {', '.join(p.target_companies) if p.target_companies else 'None'}")
+        print(f"  * Career Goal        : {p.career_goal or 'None'}")
 
         # Skills
         if p.skills:
             skills_str = ", ".join([f"{s.get('name')} ({s.get('level')})" for s in p.skills])
-            print(f"  • Skills ({len(p.skills)})       : {skills_str}")
+            print(f"  * Skills ({len(p.skills)})       : {skills_str}")
         else:
-            print("  • Skills             : No skills added yet")
+            print("  * Skills             : No skills added yet")
 
         # Education
         if p.education:
-            print(f"  • Education History  : {len(p.education)} record(s)")
+            print(f"  * Education History  : {len(p.education)} record(s)")
             for e in p.education:
                 deg = e.get("degree") or "Degree"
                 inst = e.get("institution") or "College"
@@ -71,7 +72,7 @@ def view_all():
                 cgpa_str = f" | CGPA: {cgpa}" if cgpa else ""
                 print(f"      - {deg} at {inst} ({yr}){cgpa_str}")
         else:
-            print("  • Education History  : No records added yet")
+            print("  * Education History  : No records added yet")
 
     print("\n" + "=" * 80 + "\n")
     db.close()
