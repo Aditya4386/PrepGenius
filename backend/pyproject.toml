@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "prepgenius-backend"
+version = "0.1.0"
+description = "PrepGenius Backend - Smart Unified System for Personalized Career Readiness"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy>=2.0.35",
+    "pymysql>=1.1.1",
+    "cryptography>=43.0.1",
+    "alembic>=1.13.3",
+    "python-dotenv>=1.0.1",
+    "pyjwt[crypto]>=2.9.0",
+    "httpx>=0.27.2",
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "bcrypt>=5.0.0",
+    "email-validator>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+]
