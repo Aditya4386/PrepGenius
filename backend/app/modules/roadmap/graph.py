@@ -11,7 +11,7 @@ from langgraph.graph import StateGraph, START, END
 from app.modules.roadmap.schemas import RoadmapTask
 from app.modules.roadmap.feasibility import check_feasibility, FeasibilityViolation, repair_plan_prompt
 from app.modules.roadmap.prompts import ROLE_TEMPLATE_PROMPT, REPAIR_PROMPT, ANALYZE_GAPS_PROMPT
-from app.shared.llm import get_llm, LLMError
+from app.shared.llm import get_llm, get_llm_for_task, LLMError, LLMTask
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def load_role_template(state: RoadmapState) -> Dict[str, Any]:
 def analyze_gaps(state: RoadmapState) -> Dict[str, Any]:
     """Analyze skill gaps using LLM."""
     logger.info("Analyzing skill gaps")
-    llm = get_llm(temperature=0.1)
+    llm = get_llm_for_task(LLMTask.ROADMAP_GAP_ANALYSIS)
 
     role_template = state["role_template"]
     role_requirements = {
@@ -115,7 +115,7 @@ def analyze_gaps(state: RoadmapState) -> Dict[str, Any]:
 def generate_plan(state: RoadmapState) -> Dict[str, Any]:
     """Generate roadmap plan using LLM."""
     logger.info("Generating roadmap plan")
-    llm = get_llm(temperature=0.2)
+    llm = get_llm_for_task(LLMTask.ROADMAP_PLAN_GENERATION)
 
     role_template = state["role_template"]
     skill_gaps = state["skill_gaps"]
@@ -200,7 +200,7 @@ def repair_plan(state: RoadmapState) -> Dict[str, Any]:
     """Repair roadmap based on violations."""
     retry_count = state.get("retry_count", 0)
     logger.info("Repairing roadmap (attempt %d)", retry_count + 1)
-    llm = get_llm(temperature=0.2)
+    llm = get_llm_for_task(LLMTask.ROADMAP_PLAN_REPAIR)
 
     violations = state["feasibility_violations"]
     roadmap = state["roadmap_draft"]

@@ -24,7 +24,7 @@ from app.modules.resume.builder.prompts import (
     DRAFT_SECTION_PROMPT,
     ASSEMBLE_RESUME_PROMPT,
 )
-from app.shared.llm import get_llm, LLMError
+from app.shared.llm import get_llm, get_llm_for_task, LLMError, LLMTask
 from app.modules.resume.schemas import ResumeBuilderAnswerResponse
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ SECTION_DISPLAY_NAMES = {
 def parse_job_description(state: BuilderState) -> Dict[str, Any]:
     """Parse job description to extract required skills and keywords. Runs ONCE per session."""
     logger.info("Parsing job description for keywords")
-    llm = get_llm(temperature=0.1)
+    llm = get_llm_for_task(LLMTask.RESUME_JOB_DESCRIPTION_PARSING)
 
     prompt = PARSE_JD_PROMPT.format(
         job_title=state["job_title"],
@@ -87,7 +87,7 @@ def parse_job_description(state: BuilderState) -> Dict[str, Any]:
 def generate_question(state: BuilderState) -> Dict[str, Any]:
     """Generate a targeted question for the current section."""
     logger.info("Generating question for section: %s", state["current_section"])
-    llm = get_llm(temperature=0.3)
+    llm = get_llm_for_task(LLMTask.RESUME_QUESTION_GENERATION)
 
     section = state["current_section"]
     section_name = SECTION_DISPLAY_NAMES.get(section, section)
@@ -130,7 +130,7 @@ def validate_answer(state: BuilderState) -> Dict[str, Any]:
 def check_completeness(state: BuilderState) -> Dict[str, Any]:
     """Check if the answer is complete or needs follow-up."""
     logger.info("Checking completeness for section: %s", state["current_section"])
-    llm = get_llm(temperature=0.1)
+    llm = get_llm_for_task(LLMTask.RESUME_ANSWER_COMPLETENESS)
 
     section = state["current_section"]
     section_name = SECTION_DISPLAY_NAMES.get(section, section)
@@ -167,7 +167,7 @@ def check_completeness(state: BuilderState) -> Dict[str, Any]:
 def draft_section(state: BuilderState) -> Dict[str, Any]:
     """Draft the section from student's answers. Does NOT auto-approve."""
     logger.info("Drafting section: %s", state["current_section"])
-    llm = get_llm(temperature=0.2)
+    llm = get_llm_for_task(LLMTask.RESUME_SECTION_DRAFTING)
 
     section = state["current_section"]
     section_name = SECTION_DISPLAY_NAMES.get(section, section)
@@ -218,7 +218,7 @@ def advance_section(state: BuilderState) -> Dict[str, Any]:
 def assemble_resume(state: BuilderState) -> Dict[str, Any]:
     """Assemble final resume from APPROVED sections only."""
     logger.info("Assembling final resume")
-    llm = get_llm(temperature=0.1)
+    llm = get_llm_for_task(LLMTask.RESUME_FINAL_ASSEMBLY)
 
     approved = state.get("approved_sections", [])
     job_keywords = state.get("job_keywords", [])

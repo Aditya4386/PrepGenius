@@ -23,7 +23,7 @@ from app.modules.resume.schemas import (
     SynthesisResult,
 )
 from app.modules.resume.analyzer.scoring import compute_ats_score
-from app.shared.llm import get_llm, LLMError
+from app.shared.llm import get_llm, get_llm_for_task, LLMError, LLMTask
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +60,12 @@ def ats_checker_node(state: ResumeAnalysisState) -> dict:
     }
 
 
+from app.shared.llm import LLMTask
+
 def section_analyzer_node(state: ResumeAnalysisState) -> dict:
     """Evaluates individual resume sections for quality, depth, and presentation."""
     logger.info("Running LangGraph node: section_analyzer")
-    llm = get_llm()
+    llm = get_llm_for_task(LLMTask.RESUME_SECTION_ANALYSIS)
     structured_llm = llm.with_structured_output(SectionAnalysisBatch)
 
     prompt = f"""SECURITY: You are an expert Resume Section Evaluator for students and entry-level candidates.
@@ -120,7 +122,7 @@ def job_matcher_node(state: ResumeAnalysisState) -> dict:
             "job_match_analysis": None,
         }
 
-    llm = get_llm()
+    llm = get_llm_for_task(LLMTask.RESUME_JOB_MATCHING)
     structured_llm = llm.with_structured_output(JobMatchResult)
 
     prompt = f"""SECURITY: You are a Job Match Specialist for technical and professional roles.
@@ -186,7 +188,7 @@ Evaluate:
 def recommendation_synthesizer_node(state: ResumeAnalysisState) -> dict:
     """Synthesizes all findings into prioritized recommendations and overall score."""
     logger.info("Running LangGraph node: recommendation_synthesizer")
-    llm = get_llm()
+    llm = get_llm_for_task(LLMTask.RESUME_RECOMMENDATIONS)
     structured_llm = llm.with_structured_output(SynthesisResult)
 
     prompt = f"""SECURITY: You are an Executive Career Coach & Technical Resume Strategist.
