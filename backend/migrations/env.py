@@ -17,6 +17,7 @@ if config.config_file_name is not None:
 from app.core.config import settings
 from app.db.base import Base
 from app.modules.profile import models  # noqa: F401
+from app.modules.resume import models  # noqa: F401
 
 target_metadata = Base.metadata
 config.set_main_option("sqlalchemy.url", settings.get_database_url())

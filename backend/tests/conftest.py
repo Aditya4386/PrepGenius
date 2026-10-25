@@ -1,47 +1,46 @@
+"""
+conftest.py — Shared test configuration for backend.
+"""
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
 from app.main import app
 from app.db.base import Base
 from app.db.session import get_db
+from app.core.config import settings
 
-# Use an in-memory SQLite database with StaticPool for fast, isolated tests
-TEST_DATABASE_URL = "sqlite:///:memory:"
 
-test_engine = create_engine(
+# Use in-memory SQLite for testing
+TEST_DATABASE_URL = "sqlite:///./test.db"
+
+engine = create_engine(
     TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_db():
-    Base.metadata.create_all(bind=test_engine)
-    yield
-    Base.metadata.drop_all(bind=test_engine)
-
-
-@pytest.fixture
+@pytest.fixture(scope="function")
 def db_session():
-    """Provides a fresh transactional database session for each test."""
-    connection = test_engine.connect()
-    transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
-
-    yield session
-
-    session.close()
-    transaction.rollback()
-    connection.close()
+    """Create a fresh database session for each test."""
+    Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+        Base.metadata.drop_all(bind=engine)
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def client(db_session):
-    """Provides a TestClient with overridden get_db dependency."""
+    """Create a test client with overridden database dependency."""
     def override_get_db():
         try:
             yield db_session
@@ -52,3 +51,9 @@ def client(db_session):
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def mock_student_id():
+    """Mock student ID for testing."""
+    return "mock_test_student_123"
