@@ -130,13 +130,13 @@ TASK_MODEL_MAP: Dict[LLMTask, Dict[str, Any]] = {
         "provider": LLMProvider.NVIDIA,
         "model": "nvidia/nemotron-3-ultra-550b-a55b",
         "temperature": 0.2,
-        "max_tokens": 8000,
+        "max_tokens": 6000,
     },
     LLMTask.ROADMAP_PLAN_REPAIR: {
         "provider": LLMProvider.NVIDIA,
         "model": "nvidia/nemotron-3-ultra-550b-a55b",
         "temperature": 0.2,
-        "max_tokens": 8000,
+        "max_tokens": 3000,
     },
     LLMTask.ROADMAP_ADAPTATION: {
         "provider": LLMProvider.NVIDIA,
@@ -155,9 +155,9 @@ class NVIDIAChatModel(BaseChatModel):
     base_url: str = "https://integrate.api.nvidia.com/v1"
     temperature: float = 0.2
     max_tokens: int = 4000
-    timeout: int = 60
-    max_retries: int = 3
-    retry_delay: float = 1.0
+    timeout: int = 180
+    max_retries: int = 2
+    retry_delay: float = 2.0
 
     class Config:
         arbitrary_types_allowed = True

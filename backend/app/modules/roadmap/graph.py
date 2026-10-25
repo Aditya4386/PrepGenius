@@ -198,7 +198,8 @@ def should_retry(state: RoadmapState) -> str:
 
 def repair_plan(state: RoadmapState) -> Dict[str, Any]:
     """Repair roadmap based on violations."""
-    logger.info("Repairing roadmap (attempt %d)", state.get("retry_count", 0) + 1)
+    retry_count = state.get("retry_count", 0)
+    logger.info("Repairing roadmap (attempt %d)", retry_count + 1)
     llm = get_llm(temperature=0.2)
 
     violations = state["feasibility_violations"]
