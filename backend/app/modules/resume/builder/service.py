@@ -73,6 +73,10 @@ def submit_answer(
     if session.get("status") != "in_progress":
         raise ValueError("Session is not active")
 
+    # Verify the answer is for the current section
+    if request.section != session.get("current_section"):
+        raise ValueError(f"Answer must be for current section: {session.get('current_section')}")
+
     # Add answer to session
     answers = session.get("answers", [])
     answers.append({
@@ -120,7 +124,7 @@ def submit_answer(
     session["followup_counts"] = result.get("followup_counts", {})
     session["jd_parsed"] = result.get("jd_parsed", False)
 
-    # Check if complete
+    # Check if complete (all sections approved and assembled)
     if result.get("final_resume"):
         session["status"] = "completed"
         session["final_resume"] = result.get("final_resume")
@@ -147,6 +151,54 @@ def submit_answer(
     )
 
 
+def _advance_session(session: Dict[str, Any]) -> Dict[str, Any]:
+    """Manually advance session to next section and generate question."""
+    section_index = session.get("section_index", 0)
+    if section_index + 1 >= len(SECTION_ORDER):
+        # All sections done - trigger assembly
+        return {"final_resume": True}
+
+    next_index = section_index + 1
+    next_section = SECTION_ORDER[next_index]
+    followup_counts = session.get("followup_counts", {})
+    followup_counts[next_section] = 0
+
+    # Update session state
+    session["current_section"] = next_section
+    session["section_index"] = next_index
+    session["followup_counts"] = followup_counts
+
+    # Generate question for the new section
+    state = {
+        "session_id": session["id"],
+        "student_id": session["student_id"],
+        "job_title": session["job_title"],
+        "job_description": session["job_description"],
+        "status": session["status"],
+        "current_section": next_section,
+        "section_index": next_index,
+        "answers": session.get("answers", []),
+        "drafts": session.get("drafts", []),
+        "approved_sections": session.get("approved_sections", []),
+        "job_keywords": session.get("job_keywords", []),
+        "followup_counts": followup_counts,
+        "max_followups": 2,
+        "error": None,
+        "jd_parsed": True,
+    }
+
+    # Generate question for the new section
+    try:
+        result = resume_builder_graph.invoke(state)
+        session["drafts"] = result.get("drafts", session.get("drafts", []))
+        session["current_section"] = result.get("current_section", next_section)
+        session["followup_counts"] = result.get("followup_counts", followup_counts)
+        return {"question": result.get("drafts", [])[-1].get("question") if result.get("drafts") else None}
+    except LLMError as e:
+        logger.error("Failed to generate question for next section: %s", e)
+        return {"error": str(e)}
+
+
 def approve_section(
     session_id: str,
     student_id: str,
@@ -157,6 +209,10 @@ def approve_section(
     session = get_builder_session(session_id, student_id)
     if not session:
         raise ValueError("Session not found")
+
+    # Verify the section being approved matches the current section
+    if section != session.get("current_section"):
+        raise ValueError(f"Can only approve current section: {session.get('current_section')}")
 
     approved = session.get("approved_sections", [])
     # Update or add approved section
@@ -170,7 +226,50 @@ def approve_section(
         approved.append({"section": section, "content": content})
     session["approved_sections"] = approved
 
-    return {"message": "Section approved", "section": section}
+    # Check if all sections are approved
+    if len(session.get("approved_sections", [])) >= len(SECTION_ORDER):
+        # All sections approved - assemble final resume
+        from app.modules.resume.builder.graph import assemble_resume
+        state = {
+            "session_id": session_id,
+            "student_id": student_id,
+            "job_title": session["job_title"],
+            "job_description": session["job_description"],
+            "status": session["status"],
+            "current_section": session["current_section"],
+            "section_index": session.get("section_index", 0),
+            "answers": session.get("answers", []),
+            "drafts": session.get("drafts", []),
+            "approved_sections": session.get("approved_sections", []),
+            "job_keywords": session.get("job_keywords", []),
+            "followup_counts": session.get("followup_counts", {}),
+            "max_followups": 2,
+            "error": None,
+            "jd_parsed": session.get("jd_parsed", False),
+        }
+        try:
+            result = assemble_resume(state)
+            if result.get("final_resume"):
+                session["status"] = "completed"
+                session["final_resume"] = result.get("final_resume")
+                session["keyword_coverage"] = result.get("keyword_coverage", {})
+        except LLMError as e:
+            logger.error("Failed to assemble final resume: %s", e)
+            raise ValueError(f"Failed to assemble resume: {e}")
+
+        return {"message": "All sections approved. Resume assembled.", "section": section, "completed": True}
+
+    # Advance to next section and generate question
+    advance_result = _advance_session(session)
+    if "error" in advance_result:
+        raise ValueError(advance_result["error"])
+
+    return {
+        "message": "Section approved",
+        "section": section,
+        "next_section": session.get("current_section"),
+        "next_question": advance_result.get("question"),
+    }
 
 
 def get_session_status(session_id: str, student_id: str) -> Dict[str, Any]:

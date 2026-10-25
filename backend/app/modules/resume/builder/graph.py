@@ -264,7 +264,17 @@ def should_parse_jd(state: BuilderState) -> str:
 
 
 def create_builder_graph():
-    """Build and compile the resume builder subgraph."""
+    """Build and compile the resume builder subgraph.
+
+    Turn-based flow:
+    1. Start -> parse_jd -> generate_question (first question)
+    2. Answer submitted -> validate_answer -> check_completeness
+       - If followup needed -> generate_question (followup)
+       - If complete -> draft_section -> STOP (return draft)
+    3. Student approves -> /approve endpoint manually advances session
+       and invokes generate_question for next section
+    4. After all sections approved -> assemble_resume
+    """
     workflow = StateGraph(BuilderState)
 
     workflow.add_node("parse_jd", parse_job_description)
@@ -272,18 +282,14 @@ def create_builder_graph():
     workflow.add_node("validate_answer", validate_answer)
     workflow.add_node("check_completeness", check_completeness)
     workflow.add_node("draft_section", draft_section)
-    workflow.add_node("advance_section", advance_section)
     workflow.add_node("assemble_resume", assemble_resume)
 
     # Start: check if JD already parsed
-    workflow.add_edge(START, "parse_jd")
-
-    # After parse_jd or skip, generate question
     workflow.add_conditional_edges(
-        "parse_jd",
+        START,
         should_parse_jd,
         {
-            "parse_jd": "parse_jd",  # shouldn't happen but safe
+            "parse_jd": "parse_jd",
             "generate_question": "generate_question",
         },
     )
@@ -300,16 +306,9 @@ def create_builder_graph():
         },
     )
 
-    workflow.add_edge("draft_section", "advance_section")
-
-    workflow.add_conditional_edges(
-        "advance_section",
-        next_section_or_finish,
-        {
-            "next_section": "generate_question",
-            "assemble": "assemble_resume",
-        },
-    )
+    # After drafting, STOP. Student must explicitly approve via /approve endpoint.
+    # The /approve endpoint will manually advance the session and invoke generate_question.
+    workflow.add_edge("draft_section", END)
 
     workflow.add_edge("assemble_resume", END)
 
