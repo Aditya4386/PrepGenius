@@ -3,17 +3,20 @@ llm.py — Centralized LLM provider with NVIDIA Nemotron and Groq support.
 
 Provides task-based model routing, structured output parsing, and
 compatibility with LangChain/LangGraph implementations.
+
+Retry behavior is centralized using LangChain's Runnable.with_retry().
+Built-in provider retries are disabled to avoid nested retries.
 """
 
 import json
 import logging
-import time
 from enum import Enum
 from typing import Any, Dict, Optional, Type, TypeVar
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
+from langchain_core.runnables import Runnable
 from pydantic import BaseModel
 
 from app.core.config import settings
@@ -65,7 +68,6 @@ class LLMConfigError(Exception):
 
 
 # Task-to-model routing configuration
-# All tasks initially route to Nemotron Ultra
 TASK_MODEL_MAP: Dict[LLMTask, Dict[str, Any]] = {
     # Resume Analyzer
     LLMTask.RESUME_SECTION_ANALYSIS: {
@@ -147,8 +149,110 @@ TASK_MODEL_MAP: Dict[LLMTask, Dict[str, Any]] = {
 }
 
 
+def _should_retry_exception(exc: BaseException) -> bool:
+    """Determine if an exception should trigger a retry."""
+    import httpx
+    import groq
+
+    # Retry on rate limits (429)
+    if isinstance(exc, httpx.HTTPStatusError):
+        if exc.response.status_code == 429:
+            return True
+        # Retry on 5xx server errors
+        if 500 <= exc.response.status_code < 600:
+            return True
+        # Don't retry 4xx client errors (except 429)
+        return False
+
+    # Retry on timeouts and connection errors
+    if isinstance(exc, (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError)):
+        return True
+
+    # Retry on Groq-specific transient errors
+    if isinstance(exc, (groq.RateLimitError, groq.APITimeoutError, groq.InternalServerError, groq.APIConnectionError)):
+        return True
+
+    # Don't retry authentication errors, invalid requests, etc.
+    if isinstance(exc, (groq.AuthenticationError, groq.BadRequestError, groq.NotFoundError, groq.PermissionDeniedError, groq.UnprocessableEntityError)):
+        return False
+
+    if isinstance(exc, (httpx.HTTPStatusError,)):
+        # Already handled 429 and 5xx above
+        return False
+
+    # Don't retry other exceptions by default
+    return False
+
+
+def _create_retry_config():
+    """Create LangChain retry configuration."""
+    from langchain_core.runnables.retry import ExponentialJitterParams
+
+    return {
+        "retry_if_exception_type": (
+            # HTTP and network errors
+            ImportError,  # placeholder, will be replaced with actual exception types
+        ),
+        "wait_exponential_jitter": True,
+        "exponential_jitter_params": {
+            "initial": 1.0,
+            "maximum": 60.0,
+            "multiplier": 2.0,
+            "jitter": 0.2,
+        },
+        "stop_after_attempt": 3,
+    }
+
+
+def _make_runnable_with_retry(runnable: Runnable) -> Runnable:
+    """Wrap a runnable with centralized retry behavior."""
+    import httpx
+    import groq
+    from langchain_core.runnables.retry import ExponentialJitterParams, RunnableRetry
+
+    class RunnableRetryWithStructuredOutput(RunnableRetry):
+        """RunnableRetry subclass that delegates with_structured_output to the bound runnable."""
+        def with_structured_output(self, schema: Type[T], **kwargs: Any) -> "StructuredOutputWrapper[T]":
+            return self.bound.with_structured_output(schema, **kwargs)
+
+    wrapped = runnable.with_retry(
+        retry_if_exception_type=(
+            httpx.TimeoutException,
+            httpx.ConnectError,
+            httpx.ReadError,
+            httpx.HTTPStatusError,
+            groq.RateLimitError,
+            groq.APITimeoutError,
+            groq.InternalServerError,
+            groq.APIConnectionError,
+        ),
+        wait_exponential_jitter=True,
+        exponential_jitter_params=ExponentialJitterParams(
+            initial=1.0,
+            maximum=60.0,
+            multiplier=2.0,
+            jitter=0.2,
+        ),
+        stop_after_attempt=3,
+    )
+
+    # Replace with subclass that delegates with_structured_output
+    return RunnableRetryWithStructuredOutput(
+        bound=wrapped.bound,
+        retry_exception_types=wrapped.retry_exception_types,
+        wait_exponential_jitter=wrapped.wait_exponential_jitter,
+        exponential_jitter_params=wrapped.exponential_jitter_params,
+        max_attempt_number=wrapped.max_attempt_number,
+        kwargs=wrapped.kwargs,
+    )
+
+
 class NVIDIAChatModel(BaseChatModel):
-    """LangChain-compatible wrapper for NVIDIA Nemotron API."""
+    """LangChain-compatible wrapper for NVIDIA Nemotron API.
+
+    Built-in retries are DISABLED. Retry behavior is applied centrally
+    via LangChain's Runnable.with_retry() in get_llm_for_task().
+    """
 
     model_name: str = "nvidia/nemotron-3-ultra-550b-a55b"
     api_key: str = ""
@@ -156,8 +260,8 @@ class NVIDIAChatModel(BaseChatModel):
     temperature: float = 0.2
     max_tokens: int = 4000
     timeout: int = 180
-    max_retries: int = 2
-    retry_delay: float = 2.0
+    # Built-in retries DISABLED - handled by LangChain's with_retry()
+    max_retries: int = 0
 
     class Config:
         arbitrary_types_allowed = True
@@ -178,7 +282,7 @@ class NVIDIAChatModel(BaseChatModel):
         run_manager: Optional[Any] = None,
         **kwargs: Any,
     ) -> ChatResult:
-        """Generate a chat completion."""
+        """Generate a chat completion without built-in retries."""
         from langchain_core.messages import AIMessage
 
         payload = {
@@ -198,62 +302,41 @@ class NVIDIAChatModel(BaseChatModel):
             "Content-Type": "application/json",
         }
 
-        last_error = None
-        for attempt in range(self.max_retries + 1):
-            try:
-                import httpx
-                with httpx.Client(timeout=self.timeout) as client:
-                    response = client.post(
-                        f"{self.base_url}/chat/completions",
-                        headers=headers,
-                        json=payload,
-                    )
+        import httpx
+        with httpx.Client(timeout=self.timeout) as client:
+            response = client.post(
+                f"{self.base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+            )
 
-                if response.status_code == 429:
-                    # Rate limited - wait and retry
-                    retry_after = response.headers.get("retry-after")
-                    wait_time = float(retry_after) if retry_after else self.retry_delay * (2 ** attempt)
-                    logger.warning(f"Rate limited, waiting {wait_time}s before retry (attempt {attempt + 1}/{self.max_retries})")
-                    time.sleep(wait_time)
-                    continue
+        # Handle 429 with Retry-After header
+        if response.status_code == 429:
+            retry_after = response.headers.get("retry-after")
+            raise httpx.HTTPStatusError(
+                "Rate limited",
+                request=response.request,
+                response=response,
+            )
 
-                if response.status_code == 401:
-                    raise LLMError("NVIDIA API authentication failed. Check NVIDIA_API_KEY.", provider="nvidia", model=self.model_name)
+        if response.status_code == 401:
+            raise LLMError("NVIDIA API authentication failed. Check NVIDIA_API_KEY.", provider="nvidia", model=self.model_name)
 
-                if response.status_code == 404:
-                    raise LLMError(f"Model {self.model_name} not found or not accessible.", provider="nvidia", model=self.model_name)
+        if response.status_code == 404:
+            raise LLMError(f"Model {self.model_name} not found or not accessible.", provider="nvidia", model=self.model_name)
 
-                response.raise_for_status()
-                data = response.json()
+        response.raise_for_status()
+        data = response.json()
 
-                content = data["choices"][0]["message"].get("content", "")
-                # Handle reasoning field if present (some NVIDIA models include it)
-                reasoning = data["choices"][0]["message"].get("reasoning")
-                if reasoning:
-                    logger.debug(f"Model reasoning (hidden): {reasoning[:200]}")
+        content = data["choices"][0]["message"].get("content", "")
+        # Handle reasoning field if present (some NVIDIA models include it)
+        reasoning = data["choices"][0]["message"].get("reasoning")
+        if reasoning:
+            logger.debug(f"Model reasoning (hidden): {reasoning[:200]}")
 
-                message = AIMessage(content=content)
-                generation = ChatGeneration(message=message)
-                return ChatResult(generations=[generation])
-
-            except httpx.TimeoutException as e:
-                last_error = e
-                logger.warning(f"Request timeout (attempt {attempt + 1}/{self.max_retries}): {e}")
-            except httpx.HTTPStatusError as e:
-                last_error = e
-                if e.response.status_code >= 500:
-                    logger.warning(f"Server error (attempt {attempt + 1}/{self.max_retries}): {e}")
-                else:
-                    raise LLMError(f"NVIDIA API error: {e.response.text}", provider="nvidia", model=self.model_name) from e
-            except Exception as e:
-                last_error = e
-                logger.error(f"Unexpected error: {e}")
-                break
-
-            if attempt < self.max_retries:
-                time.sleep(self.retry_delay * (2 ** attempt))
-
-        raise LLMError(f"NVIDIA API request failed after {self.max_retries + 1} attempts: {last_error}", provider="nvidia", model=self.model_name) from last_error
+        message = AIMessage(content=content)
+        generation = ChatGeneration(message=message)
+        return ChatResult(generations=[generation])
 
     async def _agenerate(
         self,
@@ -307,14 +390,14 @@ class StructuredOutputWrapper:
 
 def get_llm_for_task(task: LLMTask, temperature: Optional[float] = None) -> BaseChatModel:
     """
-    Get an LLM instance configured for a specific task.
+    Get an LLM instance configured for a specific task, wrapped with centralized retry behavior.
 
     Args:
         task: The task identifier for model routing.
         temperature: Optional temperature override.
 
     Returns:
-        A LangChain-compatible chat model instance.
+        A LangChain-compatible chat model instance with centralized retry behavior.
     """
     config = TASK_MODEL_MAP.get(task)
     if not config:
@@ -326,23 +409,28 @@ def get_llm_for_task(task: LLMTask, temperature: Optional[float] = None) -> Base
     max_tokens = config.get("max_tokens", 4000)
 
     if provider == LLMProvider.NVIDIA:
-        return NVIDIAChatModel(
+        base_model = NVIDIAChatModel(
             model_name=model,
             api_key=settings.NVIDIA_API_KEY,
             base_url=settings.NVIDIA_BASE_URL,
             temperature=temp,
             max_tokens=max_tokens,
+            max_retries=0,  # Disable built-in retries
         )
     elif provider == LLMProvider.GROQ:
         from langchain_groq import ChatGroq
-        return ChatGroq(
+        base_model = ChatGroq(
             model=model,
             api_key=settings.GROQ_API_KEY,
             temperature=temp,
             max_tokens=max_tokens,
+            max_retries=0,  # Disable built-in retries
         )
     else:
         raise LLMConfigError(f"Unknown provider: {provider}")
+
+    # Apply centralized retry behavior via LangChain's with_retry()
+    return _make_runnable_with_retry(base_model)
 
 
 def get_llm(temperature: Optional[float] = None) -> BaseChatModel:
@@ -354,20 +442,25 @@ def get_llm(temperature: Optional[float] = None) -> BaseChatModel:
     provider = getattr(settings, "LLM_PROVIDER", "nvidia")
 
     if provider == "nvidia":
-        return NVIDIAChatModel(
+        base_model = NVIDIAChatModel(
             model_name=settings.NVIDIA_DEFAULT_MODEL,
             api_key=settings.NVIDIA_API_KEY,
             base_url=settings.NVIDIA_BASE_URL,
             temperature=temperature if temperature is not None else 0.2,
             max_tokens=4000,
+            max_retries=0,  # Disable built-in retries
         )
     elif provider == "groq":
         from langchain_groq import ChatGroq
-        return ChatGroq(
+        base_model = ChatGroq(
             model=settings.GROQ_MODEL,
             api_key=settings.GROQ_API_KEY,
             temperature=temperature if temperature is not None else settings.GROQ_TEMPERATURE,
             max_tokens=4000,
+            max_retries=0,  # Disable built-in retries
         )
     else:
         raise LLMConfigError(f"Unknown LLM_PROVIDER: {provider}")
+
+    # Apply centralized retry behavior
+    return _make_runnable_with_retry(base_model)
