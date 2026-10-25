@@ -37,10 +37,18 @@ class Settings(BaseSettings):
         "http://localhost:8000",
     ]
 
-    # Groq LLM Configuration
+    # NVIDIA Nemotron Configuration
+    NVIDIA_API_KEY: str = ""
+    NVIDIA_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    NVIDIA_DEFAULT_MODEL: str = "nvidia/nemotron-3-ultra-550b-a55b"
+
+    # Groq LLM Configuration (Fallback)
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
     GROQ_TEMPERATURE: float = 0.2
+
+    # LLM Provider Selection: "nvidia" or "groq"
+    LLM_PROVIDER: str = "nvidia"
 
     # Tavily Search
     TAVILY_API_KEY: str = ""
