@@ -1,0 +1,57 @@
+{
+  "role": "Data Analyst",
+  "core_topics": [
+    "SQL & Database Querying",
+    "Data Visualization (Tableau, PowerBI, Matplotlib, Seaborn)",
+    "Statistical Analysis",
+    "Python for Data Analysis (Pandas, NumPy)",
+    "Data Cleaning & Preprocessing",
+    "Exploratory Data Analysis",
+    "Business Intelligence Concepts",
+    "Dashboard Design",
+    "A/B Testing",
+    "Communication & Storytelling with Data"
+  ],
+  "skills": [
+    {"name": "SQL", "category": "Database", "typical_hours": 30},
+    {"name": "Python", "category": "Language", "typical_hours": 25},
+    {"name": "Pandas/NumPy", "category": "Data Manipulation", "typical_hours": 20},
+    {"name": "Tableau/PowerBI", "category": "Visualization", "typical_hours": 20},
+    {"name": "Excel/Google Sheets", "category": "Tools", "typical_hours": 10},
+    {"name": "Statistics", "category": "Math", "typical_hours": 20},
+    {"name": "Data Cleaning", "category": "Process", "typical_hours": 15}
+  ],
+  "company_type_adjustments": {
+    "product": {
+      "emphasis": ["Product Metrics", "User Behavior Analysis", "Experimentation", "Data Pipelines"],
+      "additional_topics": ["Event Tracking", "Cohort Analysis", "Retention Metrics"]
+    },
+    "service": {
+      "emphasis": ["Client Reporting", "KPI Dashboards", "Ad-hoc Analysis", "Domain Knowledge"],
+      "additional_topics": ["Financial Modeling", "Operational Metrics", "Presentation Skills"]
+    },
+    "startup": {
+      "emphasis": ["Growth Metrics", "Funnel Analysis", "Quick Insights", "Tool Flexibility"],
+      "additional_topics": ["North Star Metric", "Unit Economics", "Data Infrastructure Setup"]
+    }
+  },
+  "interview_topics": [
+    "SQL Case Studies",
+    "Data Interpretation Exercises",
+    "Metric Definition & Diagnosis",
+    "A/B Test Design",
+    "Dashboard Critique"
+  ],
+  "typical_task_hours": {
+    "SQL": 40,
+    "Data Visualization": 30,
+    "Statistics": 25,
+    "Python/Pandas": 30,
+    "Data Cleaning": 20,
+    "EDA": 20,
+    "BI Concepts": 15,
+    "Dashboard Design": 15,
+    "A/B Testing": 15,
+    "Communication": 10
+  }
+}

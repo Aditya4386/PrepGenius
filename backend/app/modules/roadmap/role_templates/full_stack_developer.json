@@ -1,0 +1,59 @@
+{
+  "role": "Full-Stack Developer",
+  "core_topics": [
+    "Frontend Fundamentals (HTML, CSS, JS)",
+    "React/Vue/Angular",
+    "State Management",
+    "Backend API Development",
+    "Database Design",
+    "Authentication & Authorization",
+    "Testing (Unit, Integration, E2E)",
+    "CI/CD Pipelines",
+    "Performance Optimization",
+    "TypeScript"
+  ],
+  "skills": [
+    {"name": "JavaScript", "category": "Language", "typical_hours": 25},
+    {"name": "TypeScript", "category": "Language", "typical_hours": 20},
+    {"name": "React", "category": "Frontend", "typical_hours": 30},
+    {"name": "Node.js", "category": "Backend", "typical_hours": 25},
+    {"name": "SQL", "category": "Database", "typical_hours": 15},
+    {"name": "PostgreSQL/MongoDB", "category": "Database", "typical_hours": 15},
+    {"name": "Git", "category": "Tools", "typical_hours": 5},
+    {"name": "Docker", "category": "DevOps", "typical_hours": 10},
+    {"name": "CSS/Tailwind", "category": "Styling", "typical_hours": 15}
+  ],
+  "company_type_adjustments": {
+    "product": {
+      "emphasis": ["Scalable Frontend Architecture", "Performance", "Design Systems", "Testing"],
+      "additional_topics": ["Micro-frontends", "SSR/SSG", "Web Vitals"]
+    },
+    "service": {
+      "emphasis": ["Client Requirements", "CMS Integration", "Cross-browser Compatibility", "Delivery"],
+      "additional_topics": ["WordPress/Headless CMS", "Accessibility", "Project Management"]
+    },
+    "startup": {
+      "emphasis": ["Rapid Feature Delivery", "End-to-End Ownership", "Pragmatic Tech Choices", "Metrics"],
+      "additional_topics": ["MVP Iteration", "Analytics", "A/B Testing"]
+    }
+  },
+  "interview_topics": [
+    "Frontend Architecture",
+    "State Management Patterns",
+    "API Integration",
+    "Performance Optimization",
+    "Debugging Complex UI Issues"
+  ],
+  "typical_task_hours": {
+    "Frontend Fundamentals": 30,
+    "React/Vue/Angular": 40,
+    "State Management": 20,
+    "Backend API": 30,
+    "Database Design": 20,
+    "Auth": 10,
+    "Testing": 20,
+    "CI/CD": 15,
+    "Performance": 15,
+    "TypeScript": 15
+  }
+}

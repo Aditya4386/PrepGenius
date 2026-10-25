@@ -37,6 +37,29 @@ class Settings(BaseSettings):
         "http://localhost:8000",
     ]
 
+    # NVIDIA Nemotron Configuration
+    NVIDIA_API_KEY: str = ""
+    NVIDIA_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    NVIDIA_DEFAULT_MODEL: str = "nvidia/nemotron-3-ultra-550b-a55b"
+
+    # Groq LLM Configuration (Fallback)
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
+    GROQ_TEMPERATURE: float = 0.2
+
+    # LLM Provider Selection: "nvidia" or "groq"
+    LLM_PROVIDER: str = "nvidia"
+
+    # Tavily Search
+    TAVILY_API_KEY: str = ""
+
+    # Resume Analysis Settings
+    MAX_UPLOAD_SIZE_MB: int = 5
+    MAX_TEXT_CHARS_FOR_PROMPT: int = 8000
+
+    # Embeddings
+    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -50,6 +73,10 @@ class Settings(BaseSettings):
             f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@"
             f"{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DB}?charset=utf8mb4"
         )
+
+    @property
+    def max_upload_size_bytes(self) -> int:
+        return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 
 settings = Settings()
