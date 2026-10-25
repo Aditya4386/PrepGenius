@@ -70,51 +70,51 @@ TASK_MODEL_MAP: Dict[LLMTask, Dict[str, Any]] = {
     # Resume Analyzer
     LLMTask.RESUME_SECTION_ANALYSIS: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.1,
         "max_tokens": 4000,
     },
     LLMTask.RESUME_JOB_MATCHING: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.1,
         "max_tokens": 4000,
     },
     LLMTask.RESUME_RECOMMENDATIONS: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.2,
-        "max_tokens": 4000,
+        "max_tokens": 3000,
     },
 
     # Resume Builder
     LLMTask.RESUME_JOB_DESCRIPTION_PARSING: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.1,
         "max_tokens": 2000,
     },
     LLMTask.RESUME_QUESTION_GENERATION: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.3,
         "max_tokens": 1000,
     },
     LLMTask.RESUME_ANSWER_COMPLETENESS: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.1,
         "max_tokens": 1000,
     },
     LLMTask.RESUME_SECTION_DRAFTING: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.2,
-        "max_tokens": 4000,
+        "max_tokens": 3000,
     },
     LLMTask.RESUME_FINAL_ASSEMBLY: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.1,
         "max_tokens": 4000,
     },
@@ -122,27 +122,27 @@ TASK_MODEL_MAP: Dict[LLMTask, Dict[str, Any]] = {
     # Roadmap Generator
     LLMTask.ROADMAP_GAP_ANALYSIS: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.1,
-        "max_tokens": 4000,
+        "max_tokens": 2000,
     },
     LLMTask.ROADMAP_PLAN_GENERATION: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
-        "temperature": 0.2,
-        "max_tokens": 6000,
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "temperature": 0.1,
+        "max_tokens": 4000,
     },
     LLMTask.ROADMAP_PLAN_REPAIR: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
-        "temperature": 0.2,
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "temperature": 0.1,
         "max_tokens": 3000,
     },
     LLMTask.ROADMAP_ADAPTATION: {
         "provider": LLMProvider.NVIDIA,
-        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
         "temperature": 0.2,
-        "max_tokens": 4000,
+        "max_tokens": 3000,
     },
 }
 
