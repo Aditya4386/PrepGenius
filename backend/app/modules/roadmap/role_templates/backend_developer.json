@@ -1,0 +1,59 @@
+{
+  "role": "Backend Developer",
+  "core_topics": [
+    "Data Structures & Algorithms",
+    "Database Systems (SQL, NoSQL)",
+    "API Design (REST, GraphQL)",
+    "System Design Fundamentals",
+    "Caching Strategies",
+    "Message Queues",
+    "Authentication & Authorization",
+    "Testing & Debugging",
+    "Containerization (Docker)",
+    "Cloud Basics (AWS/GCP/Azure)"
+  ],
+  "skills": [
+    {"name": "Python", "category": "Language", "typical_hours": 20},
+    {"name": "Java", "category": "Language", "typical_hours": 20},
+    {"name": "Go", "category": "Language", "typical_hours": 15},
+    {"name": "SQL", "category": "Database", "typical_hours": 15},
+    {"name": "PostgreSQL/MySQL", "category": "Database", "typical_hours": 10},
+    {"name": "Redis", "category": "Cache", "typical_hours": 8},
+    {"name": "Docker", "category": "DevOps", "typical_hours": 10},
+    {"name": "Kubernetes", "category": "DevOps", "typical_hours": 15},
+    {"name": "Git", "category": "Tools", "typical_hours": 5}
+  ],
+  "company_type_adjustments": {
+    "product": {
+      "emphasis": ["System Design", "Scalability", "Performance Optimization", "Data Structures & Algorithms"],
+      "additional_topics": ["Distributed Systems", "Microservices Architecture", "Observability"]
+    },
+    "service": {
+      "emphasis": ["API Design", "Database Optimization", "Client Communication", "Delivery Processes"],
+      "additional_topics": ["Project Management", "Agile/Scrum", "Code Review Practices"]
+    },
+    "startup": {
+      "emphasis": ["Full-Stack Exposure", "Rapid Prototyping", "Pragmatic Architecture", "Cost Optimization"],
+      "additional_topics": ["MVP Development", "Feature Flags", "Monitoring on Budget"]
+    }
+  },
+  "interview_topics": [
+    "System Design (URL Shortener, Rate Limiter, Cache)",
+    "Database Design & Optimization",
+    "API Design Patterns",
+    "Concurrency & Thread Safety",
+    "Debugging Production Issues"
+  ],
+  "typical_task_hours": {
+    "Data Structures & Algorithms": 40,
+    "Database Systems": 30,
+    "API Design": 25,
+    "System Design Fundamentals": 30,
+    "Caching": 15,
+    "Message Queues": 15,
+    "Auth": 10,
+    "Testing": 15,
+    "Docker": 10,
+    "Cloud Basics": 20
+  }
+}

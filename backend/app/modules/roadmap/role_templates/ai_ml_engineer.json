@@ -1,0 +1,58 @@
+{
+  "role": "AI/ML Engineer",
+  "core_topics": [
+    "Machine Learning Fundamentals",
+    "Deep Learning (CNN, RNN, Transformers)",
+    "MLOps & Model Deployment",
+    "Data Engineering for ML",
+    "Model Evaluation & Validation",
+    "Feature Engineering",
+    "Natural Language Processing",
+    "Computer Vision Basics",
+    "ML System Design",
+    "Responsible AI & Ethics"
+  ],
+  "skills": [
+    {"name": "Python", "category": "Language", "typical_hours": 25},
+    {"name": "PyTorch/TensorFlow", "category": "DL Framework", "typical_hours": 30},
+    {"name": "Scikit-learn", "category": "ML Library", "typical_hours": 15},
+    {"name": "SQL", "category": "Database", "typical_hours": 15},
+    {"name": "Docker/Kubernetes", "category": "DevOps", "typical_hours": 15},
+    {"name": "Cloud ML (Vertex AI, SageMaker, Azure ML)", "category": "Cloud", "typical_hours": 20},
+    {"name": "MLflow/Weights & Biases", "category": "Experiment Tracking", "typical_hours": 10},
+    {"name": "Transformers/HuggingFace", "category": "NLP", "typical_hours": 20}
+  ],
+  "company_type_adjustments": {
+    "product": {
+      "emphasis": ["Scalable ML Systems", "Model Serving", "A/B Testing Models", "Monitoring Drift"],
+      "additional_topics": ["Feature Stores", "Real-time Inference", "Model Compression"]
+    },
+    "service": {
+      "emphasis": ["Client ML Solutions", "Pre-trained Model Adaptation", "Cost Optimization", "Documentation"],
+      "additional_topics": ["Transfer Learning", "AutoML", "Consulting Workflows"]
+    },
+    "startup": {
+      "emphasis": ["Rapid Prototyping", "End-to-End ML", "Resource Constraints", "Open Source Models"],
+      "additional_topics": ["LoRA/QLoRA", "Model Quantization", "Edge Deployment"]
+    }
+  },
+  "interview_topics": [
+    "ML System Design (Recommendation, Search, Ranking)",
+    "Model Debugging & Improvement",
+    "Data Pipeline Design",
+    "Production ML Challenges",
+    "Research Paper Discussion"
+  ],
+  "typical_task_hours": {
+    "ML Fundamentals": 30,
+    "Deep Learning": 40,
+    "MLOps": 25,
+    "Data Engineering": 20,
+    "Model Evaluation": 15,
+    "Feature Engineering": 20,
+    "NLP": 25,
+    "Computer Vision": 15,
+    "ML System Design": 20,
+    "Responsible AI": 10
+  }
+}
