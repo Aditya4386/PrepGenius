@@ -586,24 +586,24 @@ Build and validate one complete feature at a time. Every phase ends with passing
 
 ### Phase 5 — Knowledge base and RAG
 
-- [ ] Collect a curated set of trusted, licensed or open learning resources aligned with the four roles.
-- [ ] Create `kb_documents` and `kb_chunks` tables with the `VECTOR(384)` column and vector index.
-- [ ] Build `scripts/ingest_kb.py`: load, clean, chunk (configurable size and overlap), embed, upsert idempotently by content hash.
-- [ ] Preserve title, URL, document ID, page, license and version metadata.
-- [ ] Implement TiDB vector retrieval with a distance threshold.
-- [ ] Generate grounded answers with citations built from retrieved metadata.
-- [ ] Implement insufficient-evidence behavior.
+- [x] Collect a curated set of trusted, licensed or open learning resources aligned with the four roles.
+- [x] Create `kb_documents` and `kb_chunks` tables with the `VECTOR(384)` column and vector index (TiDB models + migration).
+- [x] Build `scripts/ingest_kb.py`: load, clean, chunk (configurable size and overlap), embed, upsert idempotently by content hash.
+- [x] Preserve title, URL, document ID, page, license and version metadata.
+- [x] Implement TiDB vector retrieval with a distance threshold (cosine similarity via `VEC_COSINE_DISTANCE`).
+- [x] Generate grounded answers with citations built from retrieved metadata.
+- [x] Implement insufficient-evidence behavior (explicit acknowledgment + suggestions).
 - [ ] Prepare the evaluation question set with known supporting sources.
 
 **Exit criteria:** citations are verifiable and the assistant declines when evidence is insufficient.
 
 ### Phase 6 — Query routing and Tavily web search
 
-- [ ] Define the common evidence and response schema for all routes.
-- [ ] Build the learning subgraph with router, retrieval, web search, direct and answer nodes.
-- [ ] Route current-information questions to Tavily.
-- [ ] Normalize, deduplicate and rank evidence; assemble context within the token budget.
-- [ ] Add timeouts, bounded retries and graceful degradation when Tavily fails.
+- [x] Define the common evidence and response schema for all routes (unified `Evidence` TypedDict).
+- [x] Build the learning subgraph with router, retrieval, web search, direct and answer nodes (LangGraph).
+- [x] Route current-information questions to Tavily (rule-based + LLM classifier).
+- [x] Normalize, deduplicate and rank evidence; assemble context within the token budget.
+- [x] Add timeouts, bounded retries and graceful degradation when Tavily fails (fallback to empty results).
 - [ ] Test routing on representative question categories.
 
 **Exit criteria:** routing is testable, failures are handled, and source metadata is never lost.
