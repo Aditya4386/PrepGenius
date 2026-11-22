@@ -291,21 +291,24 @@ def update_task_details(
         roadmap_tasks = _roadmap_tasks.get(roadmap["id"], [])
         for task in roadmap_tasks:
             if task["id"] == task_id:
-                if data.title is not None:
+                # Use model_fields_set to check if field was explicitly provided (including null)
+                fields_set = data.model_fields_set if hasattr(data, "model_fields_set") else set()
+                
+                if "title" in fields_set:
                     task["title"] = data.title
-                if data.estimated_hours is not None:
+                if "estimated_hours" in fields_set:
                     task["estimated_hours"] = data.estimated_hours
-                if data.success_criteria is not None:
+                if "success_criteria" in fields_set:
                     task["success_criteria"] = data.success_criteria
-                if data.topic_tags is not None:
+                if "topic_tags" in fields_set:
                     task["topic_tags"] = data.topic_tags
-                if data.status is not None:
+                if "status" in fields_set:
                     task["status"] = data.status.value
                     if data.status == TaskStatusEnum.COMPLETED:
                         task["completed_at"] = utc_now()
                     else:
                         task["completed_at"] = None
-                if data.due_date is not None:
+                if "due_date" in fields_set:
                     task["due_date"] = data.due_date
                 return task
     return None

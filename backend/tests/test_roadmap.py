@@ -456,12 +456,12 @@ class TestRoadmapTaskOperations:
             # Create adaptation proposal
             create_resp = client.post(
                 "/api/v1/roadmap/adaptations",
-                data={
+                json={
                     "source_type": "interview",
                     "source_id": "interview_123",
-                    "proposed_tasks": json.dumps([
+                    "proposed_tasks": [
                         {"title": "New Task from Interview", "estimated_hours": 4, "success_criteria": "Complete", "topic_tags": ["system design"]}
-                    ]),
+                    ],
                 },
                 headers={"Authorization": f"Bearer {mock_student_id}"},
             )

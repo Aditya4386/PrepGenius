@@ -116,6 +116,12 @@ class RoadmapAdaptationAction(BaseModel):
     action: str = Field(..., pattern="^(approve|reject)$")
 
 
+class RoadmapAdaptationCreate(BaseModel):
+    source_type: str = Field(..., pattern="^(interview|resume)$")
+    source_id: str = Field(..., min_length=1)
+    proposed_tasks: List[dict] = Field(..., min_length=1)
+
+
 class TaskCompletionRequest(BaseModel):
     status: TaskStatusEnum
 
