@@ -88,7 +88,7 @@ PrepGenius is a unified AI-powered career-readiness platform for students prepar
 |---|---|
 | Orchestration | LangGraph supervisor graph with one LangGraph subgraph per feature module |
 | LLM calls | LangChain (prompt templates, structured output, retries, tools) inside every node that uses generative AI |
-| LLM provider | Groq API; model name set through environment variable so it can be changed without code changes |
+| LLM provider | NVIDIA Nemotron 3 Ultra (primary) + Groq (fallback); model names set through environment variables so they can be changed without code changes |
 | Embeddings | Local HuggingFace `sentence-transformers/all-MiniLM-L6-v2` (384 dimensions) |
 | Database | TiDB Cloud Starter (MySQL-compatible) for relational data and vector data |
 | Vector storage | TiDB `VECTOR(384)` column with cosine distance; no FAISS, no Supabase, no pgvector |
@@ -1544,3 +1544,39 @@ Implementation order:
 8. **Validation:** security, testing, evaluation, deployment and documentation.
 
 **Success criterion:** a student can sign in, build a profile, generate a roadmap, analyze or build a resume, practice a spoken interview, ask evidence-backed learning questions, turn weak areas into approved roadmap tasks, and see saved results reflected in one dashboard.
+
+---
+
+## 📊 Implementation Status Summary (as of latest commit)
+
+| Phase | Module | Status | Completion |
+|-------|--------|--------|------------|
+| **Phase 0** | Foundation, CI, Deployment | ✅ **COMPLETE** | 10/11 (deployment pending) |
+| **Phase 1** | Student Profile & Database | ✅ **COMPLETE** | 6/6 |
+| **Phase 2** | Personalized Roadmap | ✅ **COMPLETE** | 7/8 (UI pending) |
+| **Phase 3** | Resume Analyzer | 🟡 **~90%** | 7/8 (PII redaction pending) |
+| **Phase 4** | Resume Builder | ✅ **COMPLETE** | 6/6 (UI pending) |
+| **Phase 5** | Knowledge Base & RAG | ✅ **BACKEND COMPLETE** | 7/8 (eval set pending) |
+| **Phase 6** | Query Routing + Tavily | ✅ **BACKEND COMPLETE** | 5/6 (routing tests pending) |
+| **Phase 7** | Voice Mock Interview | ❌ **NOT STARTED** | 0/8 |
+| **Phase 8** | Supervisor + Dashboard | 🟡 **~15%** | 1/5 (adaptation API only) |
+| **Phase 9** | Testing & Evaluation | 🟡 **~35%** | 2/6 |
+| **Phase 10** | Security, Deployment, Docs | 🟡 **~30%** | 2/7 |
+| **Phase 11** | Final Validation | ❌ **NOT STARTED** | 0/7 |
+
+### ✅ Completed Backend Features
+- **Authentication**: JWT + Clerk with dev mock mode
+- **Student Profile**: 36 roles, 3 company types, skills/education CRUD
+- **Roadmap**: LangGraph subgraph, feasibility checks, versioning, task CRUD, adaptations
+- **Resume Analyzer**: PDF upload, ATS scoring, LLM section analysis, job matching, PDF export
+- **Resume Builder**: 7-section turn-based Q&A, JD parsing, keyword coverage, PDF export
+- **Learning Assistant (RAG)**: KB models, ingestion CLI, TiDB vector retrieval, citations, insufficient-evidence handling
+- **Query Routing**: Rule-based + LLM classifier (KB/Web/Direct), Tavily integration with fallback
+- **Tests**: 203 passing (97 roadmap + 28 learning + 78 others), zero warnings
+
+### 🔄 In Progress / Next Steps
+1. **Frontend UI** for Roadmap, Resume Builder, Learning Assistant
+2. **Knowledge Base Ingestion** (populate KB with curated resources)
+3. **Phase 7** Voice Mock Interview (Web Speech API + interview subgraph)
+4. **Phase 8** Supervisor Graph + Dashboard (readiness score, weak areas)
+5. **PII Redaction** in Resume Analyzer before LLM calls
