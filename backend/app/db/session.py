@@ -30,4 +30,5 @@ def init_db():
     from app.modules.profile import models  # noqa: F401
     from app.modules.roadmap import models  # noqa: F401
     from app.modules.resume import models  # noqa: F401
+    from app.modules.learning import models  # noqa: F401
     Base.metadata.create_all(bind=engine)
