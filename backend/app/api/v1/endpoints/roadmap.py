@@ -17,6 +17,7 @@ from app.modules.roadmap.schemas import (
     TaskStatusEnum,
     TaskCompletionRequest,
     RoadmapAdaptationAction,
+    RoadmapAdaptationCreate,
 )
 from app.modules.roadmap.service import (
     generate_roadmap,
@@ -153,13 +154,11 @@ def update_task_endpoint(
     description="Create a roadmap adaptation proposal from interview or resume analysis.",
 )
 def create_adaptation_endpoint(
-    source_type: str,
-    source_id: str,
-    proposed_tasks: List[dict],
+    data: RoadmapAdaptationCreate,
     student_id: str = Depends(get_current_student_id),
 ):
     try:
-        adaptation = create_adaptation_proposal(student_id, source_type, source_id, proposed_tasks)
+        adaptation = create_adaptation_proposal(student_id, data.source_type, data.source_id, data.proposed_tasks)
         return {
             "id": adaptation["id"],
             "roadmap_id": adaptation["roadmap_id"],
