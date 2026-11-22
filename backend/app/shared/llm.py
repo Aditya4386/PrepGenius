@@ -17,7 +17,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import Runnable
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.core.config import settings
 
@@ -52,6 +52,11 @@ class LLMTask(str, Enum):
     ROADMAP_PLAN_GENERATION = "roadmap_plan_generation"
     ROADMAP_PLAN_REPAIR = "roadmap_plan_repair"
     ROADMAP_ADAPTATION = "roadmap_adaptation"
+
+    # Learning Assistant
+    LEARNING_QUERY_ROUTING = "learning_query_routing"
+    LEARNING_ANSWER_GENERATION = "learning_answer_generation"
+    LEARNING_INSUFFICIENT_EVIDENCE = "learning_insufficient_evidence"
 
 
 class LLMError(Exception):
@@ -145,6 +150,26 @@ TASK_MODEL_MAP: Dict[LLMTask, Dict[str, Any]] = {
         "model": "nvidia/nemotron-3-ultra-550b-a55b",
         "temperature": 0.2,
         "max_tokens": 2000,
+    },
+
+    # Learning Assistant
+    LLMTask.LEARNING_QUERY_ROUTING: {
+        "provider": LLMProvider.NVIDIA,
+        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "temperature": 0.1,
+        "max_tokens": 1000,
+    },
+    LLMTask.LEARNING_ANSWER_GENERATION: {
+        "provider": LLMProvider.NVIDIA,
+        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "temperature": 0.2,
+        "max_tokens": 3000,
+    },
+    LLMTask.LEARNING_INSUFFICIENT_EVIDENCE: {
+        "provider": LLMProvider.NVIDIA,
+        "model": "nvidia/nemotron-3-ultra-550b-a55b",
+        "temperature": 0.1,
+        "max_tokens": 1500,
     },
 }
 
@@ -263,8 +288,7 @@ class NVIDIAChatModel(BaseChatModel):
     # Built-in retries DISABLED - handled by LangChain's with_retry()
     max_retries: int = 0
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
