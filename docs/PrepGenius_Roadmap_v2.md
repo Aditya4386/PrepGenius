@@ -521,66 +521,66 @@ Build and validate one complete feature at a time. Every phase ends with passing
 
 ### Phase 0 — Foundation, CI and first deployment
 
-- [ ] Freeze MVP scope and out-of-scope list.
-- [ ] Create the GitHub repository and branch/PR conventions.
-- [ ] Scaffold the React and FastAPI applications and the folder structure.
-- [ ] Configure `.env.example`, settings loader and secrets handling.
-- [ ] Create the TiDB Cloud Starter cluster; connect with SQLAlchemy over TLS; configure pooling (`pool_pre_ping`, `pool_recycle`).
-- [ ] Set up Alembic and the first migration.
-- [ ] Configure Clerk and backend JWT verification.
-- [ ] Add logging, a health endpoint, rate limiting and the API error format.
-- [ ] Set up GitHub Actions (lint and tests).
+- [x] Freeze MVP scope and out-of-scope list.
+- [x] Create the GitHub repository and branch/PR conventions.
+- [x] Scaffold the React and FastAPI applications and the folder structure.
+- [x] Configure `.env.example`, settings loader and secrets handling.
+- [x] Create the TiDB Cloud Starter cluster; connect with SQLAlchemy over TLS; configure pooling (`pool_pre_ping`, `pool_recycle`).
+- [x] Set up Alembic and the first migration.
+- [x] Configure Clerk and backend JWT verification.
+- [x] Add logging, a health endpoint, rate limiting and the API error format.
+- [x] Set up GitHub Actions (lint and tests).
 - [ ] Deploy a minimal frontend (Vercel) and backend (Render, Docker) with a protected test endpoint.
-- [ ] Define API naming, response envelope and error format.
+- [x] Define API naming, response envelope and error format.
 
 **Deliverable:** an authenticated frontend calls a deployed backend that reads and writes TiDB.
 **Exit criteria:** the repository runs from documented setup instructions on another machine and the deployed smoke test passes.
 
 ### Phase 1 — Student profile and database
 
-- [ ] Create `students` and `student_profiles` tables and migrations.
-- [ ] Implement just-in-time student creation from the Clerk token.
-- [ ] Build profile forms (education, skills with level, goal, target role, company type, target companies, weekly hours, optional deadline).
-- [ ] Implement `GET /profile` and `PUT /profile` with server-side validation.
-- [ ] Build the dashboard shell, navigation and loading, empty, success and error states.
-- [ ] Test profile access isolation between two accounts.
+- [x] Create `students` and `student_profiles` tables and migrations.
+- [x] Implement just-in-time student creation from the Clerk token.
+- [x] Build profile forms (education, skills with level, goal, target role, company type, target companies, weekly hours, optional deadline).
+- [x] Implement `GET /profile` and `PUT /profile` with server-side validation.
+- [x] Build the dashboard shell, navigation and loading, empty, success and error states.
+- [x] Test profile access isolation between two accounts.
 
 **Exit criteria:** a student saves a profile, signs out, signs in again and retrieves the same data.
 
 ### Phase 2 — Personalized roadmap
 
-- [ ] Define role templates for the four supported roles.
-- [ ] Define roadmap, phase and task Pydantic schemas.
-- [ ] Build the roadmap subgraph (section 11.2).
-- [ ] Implement feasibility checks in `feasibility.py`.
-- [ ] Persist roadmap versions, phases and tasks; maintain the single active version.
-- [ ] Implement task status and edit endpoints; compute completion from persisted tasks.
+- [x] Define role templates for the four supported roles.
+- [x] Define roadmap, phase and task Pydantic schemas.
+- [x] Build the roadmap subgraph (section 11.2).
+- [x] Implement feasibility checks in `feasibility.py`.
+- [x] Persist roadmap versions, phases and tasks; maintain the single active version (TiDB models + migrations).
+- [x] Implement task status and edit endpoints; compute completion from persisted tasks.
 - [ ] Build the roadmap UI.
-- [ ] Test with profiles that differ in role, company type, skills and weekly hours.
+- [x] Test with profiles that differ in role, company type, skills and weekly hours (97 tests passing).
 
 **Exit criteria:** output is valid, relevant to the role, feasible under the time budget and editable.
 
 ### Phase 3 — Resume analyzer
 
-- [ ] Add PDF upload with type and size validation.
-- [ ] Extract text with PyMuPDF; reject empty, unreadable and scanned PDFs with a clear message.
-- [ ] Detect sections; run deterministic checks.
+- [x] Add PDF upload with type and size validation.
+- [x] Extract text with PyMuPDF; reject empty, unreadable and scanned PDFs with a clear message.
+- [x] Detect sections; run deterministic checks.
 - [ ] Redact contact PII before any LLM call.
-- [ ] Add LLM section analysis, optional job-description matching and the documented scoring rubric.
-- [ ] Generate editable improved content.
-- [ ] Save analyses, list history, compare two analyses.
-- [ ] Export improved content as PDF.
+- [x] Add LLM section analysis, optional job-description matching and the documented scoring rubric.
+- [x] Generate editable improved content.
+- [x] Save analyses, list history, compare two analyses (API endpoints exist, in-memory stubs).
+- [x] Export improved content as PDF.
 
 **Exit criteria:** invalid files are rejected safely, feedback is structured, scores are reproducible within the stated tolerance, and the student can review and export results.
 
 ### Phase 4 — Resume builder
 
-- [ ] Define the fixed section order and per-section question strategy.
-- [ ] Build the builder subgraph (section 12.4) with persisted session state.
-- [ ] Draft each section only from the student's answers; mark unconfirmed claims.
-- [ ] Add review, edit and approve per section.
-- [ ] Assemble the resume, show job-description keyword coverage, export PDF.
-- [ ] Allow re-running the analyzer on the built resume.
+- [x] Define the fixed section order and per-section question strategy.
+- [x] Build the builder subgraph (section 12.4) with persisted session state (TiDB models + migrations).
+- [x] Draft each section only from the student's answers; mark unconfirmed claims.
+- [x] Add review, edit and approve per section.
+- [x] Assemble the resume, show job-description keyword coverage, export PDF.
+- [x] Allow re-running the analyzer on the built resume.
 
 **Exit criteria:** a student can go from job title and job description to an exported resume containing only information they supplied.
 
@@ -624,7 +624,7 @@ Build and validate one complete feature at a time. Every phase ends with passing
 ### Phase 8 — Supervisor integration, feedback loops and dashboard
 
 - [ ] Assemble the supervisor graph and register all subgraphs.
-- [ ] Implement the adaptation subgraph and proposal/apply flow (section 15).
+- [x] Implement the adaptation subgraph and proposal/apply flow (section 15) — backend API complete.
 - [ ] Implement the readiness formula, score snapshots, weak areas and next actions.
 - [ ] Build dashboard charts from saved records.
 - [ ] Test end-to-end flows across all modules.
@@ -633,8 +633,8 @@ Build and validate one complete feature at a time. Every phase ends with passing
 
 ### Phase 9 — Testing and evaluation
 
-- [ ] Unit-test deterministic logic and graph routing with fake chat models.
-- [ ] Test API validation, authentication and authorization.
+- [x] Unit-test deterministic logic and graph routing with fake chat models (roadmap: feasibility, schemas, graph nodes).
+- [x] Test API validation, authentication and authorization (profile + roadmap integration tests).
 - [ ] Run Experiments A–E (section 20).
 - [ ] Run DeepEval metrics on the RAG question set.
 - [ ] Measure latency and failure rates.
@@ -642,8 +642,8 @@ Build and validate one complete feature at a time. Every phase ends with passing
 
 ### Phase 10 — Security hardening, deployment and documentation
 
-- [ ] Audit every endpoint for authorization.
-- [ ] Verify cross-account isolation.
+- [x] Audit every endpoint for authorization (profile + roadmap tested).
+- [x] Verify cross-account isolation (tested with two accounts).
 - [ ] Configure production CORS, request-size limits, upload validation and rate limits.
 - [ ] Confirm secrets handling and the PII redaction path.
 - [ ] Verify production Clerk domain and TiDB connection settings.

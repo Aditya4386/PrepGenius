@@ -28,4 +28,6 @@ def init_db():
     """Initializes database tables defined in models."""
     # Import all models to ensure they are registered with Base.metadata
     from app.modules.profile import models  # noqa: F401
+    from app.modules.roadmap import models  # noqa: F401
+    from app.modules.resume import models  # noqa: F401
     Base.metadata.create_all(bind=engine)
